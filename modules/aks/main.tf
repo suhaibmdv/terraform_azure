@@ -11,9 +11,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
     node_count          = var.node_count
     vm_size             = var.vm_size
     zones               = ["1", "2", "3"]
+    enable_auto_scaling = true
     min_count           = var.node_count
     max_count           = var.node_count + 2
     vnet_subnet_id      = var.subnet_id
+    type                = "VirtualMachineScaleSets"
+    os_disk_size_gb     = 30
   }
 
   identity {
@@ -21,7 +24,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   network_profile {
-    network_plugin = "azure"
+    network_plugin    = "azure"
     load_balancer_sku = "standard"
   }
 }

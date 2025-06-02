@@ -1,5 +1,5 @@
 resource_group_name = "aks-multi-az-rg"
-location            = "eastus"
+location            = "westus2"
 vnet_name           = "aks-vnet"
 vnet_address_space  = ["10.0.0.0/16"]
 subnets = {
@@ -31,14 +31,14 @@ nat_gateway_name = "aks-nat-gateway"
 app_gateway_name = "aks-app-gateway"
 lb_name          = "aks-load-balancer"
 vmss_name        = "aks-vmss"
-vm_size          = "Standard_DS2_v2"
+vm_size          = "Standard_D2s_v3"
 instance_count   = 3
 admin_username   = "azureuser"
 ssh_public_key_path = "~/.ssh/id_rsa.pub"
 aks_name         = "aks-cluster"
 kubernetes_version = "1.28"
 node_count       = 3
-aks_vm_size      = "Standard_DS2_v2"
+aks_vm_size      = "Standard_D2s_v3"
 tags = {
   environment = "production"
 }

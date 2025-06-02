@@ -109,7 +109,7 @@ variable "vmss_name" {
 variable "vm_size" {
   description = "VM size for the scale set"
   type        = string
-  default     = "Standard_DS2_v2"
+  default     = "Standard_D2s_v3"
 }
 
 variable "instance_count" {
@@ -151,7 +151,7 @@ variable "node_count" {
 variable "aks_vm_size" {
   description = "VM size for the AKS node pool"
   type        = string
-  default     = "Standard_DS2_v2"
+  default     = "Standard_D2s_v3"
 }
 
 variable "tags" {
