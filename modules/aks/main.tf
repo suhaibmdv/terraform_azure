@@ -10,8 +10,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     name                = "systempool"
     node_count          = var.node_count
     vm_size             = var.vm_size
-    availability_zones  = ["1", "2", "3"]
-    enable_auto_scaling = true
+    zones               = ["1", "2", "3"]
     min_count           = var.node_count
     max_count           = var.node_count + 2
     vnet_subnet_id      = var.subnet_id
