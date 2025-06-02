@@ -77,15 +77,9 @@ variable "routes" {
   type        = map(object({
     address_prefix         = string
     next_hop_type          = string
-    next_hop_in_ip_address = string
+    next_hop_in_ip_address = optional(string)
   }))
-  default = {
-    "default" = {
-      address_prefix         = "0.0.0.0/0"
-      next_hop_type          = "Internet"
-      next_hop_in_ip_address = ""
-    }
-  }
+  default = {}
 }
 
 variable "nat_gateway_name" {
