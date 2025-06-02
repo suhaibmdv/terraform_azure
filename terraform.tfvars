@@ -25,7 +25,6 @@ routes = {
   "default" = {
     address_prefix         = "0.0.0.0/0"
     next_hop_type          = "Internet"
-    next_hop_in_ip_address = ""
   }
 }
 nat_gateway_name = "aks-nat-gateway"
