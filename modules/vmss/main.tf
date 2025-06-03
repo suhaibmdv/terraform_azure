@@ -1,3 +1,4 @@
+# Fixed modules/vmss/main.tf - Use zone 3 and available VM size
 resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   name                = var.vmss_name
   resource_group_name = var.resource_group_name
@@ -6,11 +7,17 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   instances           = var.instance_count
   admin_username      = var.admin_username
   tags                = var.tags
+  
+  # Disable password authentication
+  disable_password_authentication = true
+  
+  # Enable zones for multi-AZ - Fixed: Only use zone 3 for East US
+  zones = ["3"]
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
+    offer     = "0001-com-ubuntu-server-focal"
+    sku       = "20_04-lts-gen2"
     version   = "latest"
   }
 
@@ -24,14 +31,28 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
     primary = true
 
     ip_configuration {
-      name      = "internal"
-      subnet_id = var.subnet_id
-      primary   = true
+      name                                   = "internal"
+      subnet_id                              = var.subnet_id
+      primary                                = true
+      load_balancer_backend_address_pool_ids = var.backend_pool_id != null ? [var.backend_pool_id] : []
     }
   }
 
   admin_ssh_key {
     username   = var.admin_username
     public_key = file(var.ssh_public_key_path)
+  }
+  
+  # Custom script extension for basic setup
+  extension {
+    name                 = "HealthExtension"
+    publisher            = "Microsoft.ManagedServices"
+    type                 = "ApplicationHealthLinux"
+    type_handler_version = "1.0"
+    settings = jsonencode({
+      protocol    = "http"
+      port        = 80
+      requestPath = "/"
+    })
   }
 }

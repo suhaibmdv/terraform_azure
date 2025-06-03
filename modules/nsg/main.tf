@@ -1,3 +1,4 @@
+# Fixed modules/nsg/main.tf
 resource "azurerm_network_security_group" "nsg" {
   name                = var.nsg_name
   location            = var.location
@@ -18,4 +19,6 @@ resource "azurerm_network_security_rule" "rules" {
   destination_address_prefix  = each.value.destination_address_prefix
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.nsg.name
+  
+  depends_on = [azurerm_network_security_group.nsg]
 }

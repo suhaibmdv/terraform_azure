@@ -7,7 +7,7 @@ variable "resource_group_name" {
 variable "location" {
   description = "Azure region"
   type        = string
-  default     = "eastus"
+  default     = "East US"
 }
 
 variable "vnet_name" {
@@ -54,7 +54,7 @@ variable "security_rules" {
   }))
   default = {
     "allow-http" = {
-      priority                   = 100
+      priority                   = 1000
       direction                  = "Inbound"
       access                     = "Allow"
       protocol                   = "Tcp"
@@ -79,7 +79,13 @@ variable "routes" {
     next_hop_type          = string
     next_hop_in_ip_address = optional(string)
   }))
-  default = {}
+  default = {
+    "default" = {
+      address_prefix         = "0.0.0.0/0"
+      next_hop_type          = "Internet"
+      next_hop_in_ip_address = null
+    }
+  }
 }
 
 variable "nat_gateway_name" {
@@ -109,13 +115,13 @@ variable "vmss_name" {
 variable "vm_size" {
   description = "VM size for the scale set"
   type        = string
-  default     = "Standard_D2s_v3"
+  default     = "Standard_B1s"
 }
 
 variable "instance_count" {
   description = "Number of VM instances"
   type        = number
-  default     = 3
+  default     = 2
 }
 
 variable "admin_username" {
@@ -139,7 +145,7 @@ variable "aks_name" {
 variable "kubernetes_version" {
   description = "Kubernetes version"
   type        = string
-  default     = "1.28"
+  default     = "1.29"  # Changed from "1.28" to avoid LTS-only version
 }
 
 variable "node_count" {
@@ -151,13 +157,14 @@ variable "node_count" {
 variable "aks_vm_size" {
   description = "VM size for the AKS node pool"
   type        = string
-  default     = "Standard_D2s_v3"
+  default     = "Standard_B2s"
 }
 
 variable "tags" {
   description = "Tags for resources"
   type        = map(string)
   default = {
-    environment = "production"
+    environment = "development"
+    project     = "aks-multi-az"
   }
 }

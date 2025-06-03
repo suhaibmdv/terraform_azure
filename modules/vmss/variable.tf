@@ -38,6 +38,12 @@ variable "subnet_id" {
   type        = string
 }
 
+variable "backend_pool_id" {
+  description = "ID of the load balancer backend pool"
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "Tags for resources"
   type        = map(string)
