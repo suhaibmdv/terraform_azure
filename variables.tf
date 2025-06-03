@@ -40,32 +40,6 @@ variable "nsg_name" {
   default     = "aks-nsg"
 }
 
-variable "security_rules" {
-  description = "Map of security rules"
-  type        = map(object({
-    priority                   = number
-    direction                  = string
-    access                     = string
-    protocol                   = string
-    source_port_range          = string
-    destination_port_range     = string
-    source_address_prefix      = string
-    destination_address_prefix = string
-  }))
-  default = {
-    "allow-http" = {
-      priority                   = 1000
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "80"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-    }
-  }
-}
-
 variable "route_table_name" {
   description = "Name of the route table"
   type        = string
@@ -115,13 +89,13 @@ variable "vmss_name" {
 variable "vm_size" {
   description = "VM size for the scale set"
   type        = string
-  default     = "Standard_B1s"
+  default     = "Standard_B2s"  # Changed from B1s - has 2 vCPUs and 4GB RAM
 }
 
 variable "instance_count" {
   description = "Number of VM instances"
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "admin_username" {
@@ -145,19 +119,19 @@ variable "aks_name" {
 variable "kubernetes_version" {
   description = "Kubernetes version"
   type        = string
-  default     = "1.29"  # Changed from "1.28" to avoid LTS-only version
+  default     = "1.28"
 }
 
 variable "node_count" {
   description = "Number of nodes in the default node pool"
   type        = number
-  default     = 3
+  default     = 1
 }
 
 variable "aks_vm_size" {
   description = "VM size for the AKS node pool"
   type        = string
-  default     = "Standard_B2s"
+  default     = "Standard_B2s"  # Changed from B1s - AKS system pools need >2 cores and >4GB RAM
 }
 
 variable "tags" {
