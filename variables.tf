@@ -40,27 +40,7 @@ variable "nsg_name" {
   default     = "aks-nsg"
 }
 
-variable "route_table_name" {
-  description = "Name of the route table"
-  type        = string
-  default     = "aks-route-table"
-}
-
-variable "routes" {
-  description = "Map of routes"
-  type        = map(object({
-    address_prefix         = string
-    next_hop_type          = string
-    next_hop_in_ip_address = optional(string)
-  }))
-  default = {
-    "default" = {
-      address_prefix         = "0.0.0.0/0"
-      next_hop_type          = "Internet"
-      next_hop_in_ip_address = null
-    }
-  }
-}
+# REMOVED: Route table variables - not needed with loadBalancer outbound type
 
 variable "nat_gateway_name" {
   description = "Name of the NAT Gateway"
@@ -89,7 +69,7 @@ variable "vmss_name" {
 variable "vm_size" {
   description = "VM size for the scale set"
   type        = string
-  default     = "Standard_B2s"  # Changed from B1s - has 2 vCPUs and 4GB RAM
+  default     = "Standard_B1s"
 }
 
 variable "instance_count" {
@@ -131,7 +111,7 @@ variable "node_count" {
 variable "aks_vm_size" {
   description = "VM size for the AKS node pool"
   type        = string
-  default     = "Standard_B2s"  # Changed from B1s - AKS system pools need >2 cores and >4GB RAM
+  default     = "Standard_B1s"
 }
 
 variable "tags" {

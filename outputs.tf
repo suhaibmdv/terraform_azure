@@ -13,15 +13,12 @@ output "nsg_id" {
   value       = module.nsg.nsg_id
 }
 
-output "route_table_id" {
-  description = "ID of the route table"
-  value       = module.route_table.route_table_id
-}
+# REMOVED: Route table output - not needed with loadBalancer outbound type
 
-output "nat_gateway_id" {
-  description = "ID of the NAT Gateway"
-  value       = module.nat_gateway.nat_gateway_id
-}
+#output "nat_gateway_id" {
+  #description = "ID of the NAT Gateway"
+  #value       = module.nat_gateway.nat_gateway_id
+#}
 
 output "app_gateway_id" {
   description = "ID of the Application Gateway"

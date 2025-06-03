@@ -1,24 +1,15 @@
-# main.tf - Fixed Root Module with proper resource ordering
+# Simplified main.tf - Root Module for Student Subscription
 terraform {
-  required_version = ">= 1.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.80"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "~> 0.9"
+      version = "~> 3.0"
     }
   }
 }
 
 provider "azurerm" {
-  features {
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
-  }
+  features {}
 }
 
 # Create Resource Group first
@@ -50,7 +41,7 @@ module "subnets" {
   depends_on = [module.vnet]
 }
 
-# Create NSG
+# Create NSG with simplified rules
 module "nsg" {
   source              = "./modules/nsg"
   nsg_name            = var.nsg_name
@@ -61,26 +52,16 @@ module "nsg" {
   depends_on = [azurerm_resource_group.rg]
 }
 
-# Wait for core networking to be stable
-resource "time_sleep" "wait_for_core_networking" {
-  depends_on = [
-    module.vnet,
-    module.subnets,
-    module.nsg
-  ]
-  create_duration = "30s"
-}
-
 # Create NAT Gateway
-module "nat_gateway" {
-  source              = "./modules/nat_gateway"
-  nat_gateway_name    = var.nat_gateway_name
-  location            = var.location
-  resource_group_name = azurerm_resource_group.rg.name
-  tags                = var.tags
+#module "nat_gateway" {
+ # source              = "./modules/nat_gateway"
+  #nat_gateway_name    = var.nat_gateway_name
+  #location            = var.location
+  #resource_group_name = azurerm_resource_group.rg.name
+  #tags                = var.tags
   
-  depends_on = [time_sleep.wait_for_core_networking]
-}
+  #depends_on = [azurerm_resource_group.rg]
+#}
 
 # Create Load Balancer
 module "load_balancer" {
@@ -90,84 +71,67 @@ module "load_balancer" {
   resource_group_name = azurerm_resource_group.rg.name
   tags                = var.tags
   
-  depends_on = [time_sleep.wait_for_core_networking]
+  depends_on = [azurerm_resource_group.rg]
 }
 
-# Create Route Table (simplified)
-module "route_table" {
-  source              = "./modules/route_table"
-  route_table_name    = var.route_table_name
-  location            = var.location
-  resource_group_name = azurerm_resource_group.rg.name
-  routes              = var.routes
-  tags                = var.tags
-  associate_with_subnets = false
-  aks_subnet_id      = ""
-  
-  depends_on = [time_sleep.wait_for_core_networking]
-}
+# REMOVED: Route Table module - Not needed with loadBalancer outbound type
 
-# Wait for all networking resources to be created
-resource "time_sleep" "wait_for_all_networking" {
+# Wait for all core networking resources
+resource "time_sleep" "wait_for_core_networking" {
   depends_on = [
-    module.nat_gateway,
-    module.load_balancer,
-    module.route_table
+    module.vnet,
+    module.subnets,
+    module.nsg,
+    module.load_balancer
   ]
-  create_duration = "30s"
+  create_duration = "30s"  # Reduced wait time
 }
 
-# NSG Associations - Create these after networking is stable
+# NSG Associations
 resource "azurerm_subnet_network_security_group_association" "aks_nsg" {
   subnet_id                 = module.subnets.subnet_ids["aks"]
   network_security_group_id = module.nsg.nsg_id
   
-  depends_on = [time_sleep.wait_for_all_networking]
+  depends_on = [time_sleep.wait_for_core_networking]
 }
 
 resource "azurerm_subnet_network_security_group_association" "vmss_nsg" {
   subnet_id                 = module.subnets.subnet_ids["vmss"]
   network_security_group_id = module.nsg.nsg_id
   
-  depends_on = [time_sleep.wait_for_all_networking]
+  depends_on = [time_sleep.wait_for_core_networking]
 }
 
 resource "azurerm_subnet_network_security_group_association" "appgw_nsg" {
   subnet_id                 = module.subnets.subnet_ids["appgateway"]
   network_security_group_id = module.nsg.nsg_id
   
-  depends_on = [time_sleep.wait_for_all_networking]
+  depends_on = [time_sleep.wait_for_core_networking]
 }
 
 # NAT Gateway Associations
-resource "azurerm_subnet_nat_gateway_association" "aks_nat" {
-  subnet_id      = module.subnets.subnet_ids["aks"]
-  nat_gateway_id = module.nat_gateway.nat_gateway_id
+#resource "azurerm_subnet_nat_gateway_association" "aks_nat" {
+  #subnet_id      = module.subnets.subnet_ids["aks"]
+  #nat_gateway_id = module.nat_gateway.nat_gateway_id
   
-  depends_on = [
-    time_sleep.wait_for_all_networking,
-    azurerm_subnet_network_security_group_association.aks_nsg
-  ]
-}
+  #depends_on = [time_sleep.wait_for_core_networking]
+#}
 
-resource "azurerm_subnet_nat_gateway_association" "vmss_nat" {
-  subnet_id      = module.subnets.subnet_ids["vmss"]
-  nat_gateway_id = module.nat_gateway.nat_gateway_id
+#resource "azurerm_subnet_nat_gateway_association" "vmss_nat" {
+  #subnet_id      = module.subnets.subnet_ids["vmss"]
+  #nat_gateway_id = module.nat_gateway.nat_gateway_id
   
-  depends_on = [
-    time_sleep.wait_for_all_networking,
-    azurerm_subnet_network_security_group_association.vmss_nsg
-  ]
-}
+  #depends_on = [time_sleep.wait_for_core_networking]
+#}
 
-# Final wait for all associations
+# Wait for associations
 resource "time_sleep" "wait_for_associations" {
   depends_on = [
     azurerm_subnet_network_security_group_association.aks_nsg,
     azurerm_subnet_network_security_group_association.vmss_nsg,
-    azurerm_subnet_network_security_group_association.appgw_nsg,
-    azurerm_subnet_nat_gateway_association.aks_nat,
-    azurerm_subnet_nat_gateway_association.vmss_nat
+    azurerm_subnet_network_security_group_association.appgw_nsg
+    #azurerm_subnet_nat_gateway_association.aks_nat,
+    #azurerm_subnet_nat_gateway_association.vmss_nat
   ]
   create_duration = "30s"
 }
@@ -201,7 +165,7 @@ module "vmss" {
   depends_on = [time_sleep.wait_for_associations]
 }
 
-# Create AKS
+# Create AKS - Now with simplified networking
 module "aks" {
   source              = "./modules/aks"
   aks_name            = var.aks_name

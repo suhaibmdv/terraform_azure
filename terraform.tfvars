@@ -11,27 +11,24 @@ subnets = {
 
 nsg_name = "aks-nsg"
 
-route_table_name = "aks-route-table"
-routes = {
-  "default" = {
-    address_prefix         = "0.0.0.0/0"
-    next_hop_type          = "Internet"
-  }
-}
+# REMOVED: Route table variables - not needed with loadBalancer outbound type
 
 nat_gateway_name = "aks-nat-gateway"
 app_gateway_name = "aks-app-gateway"
 lb_name          = "aks-load-balancer"
 vmss_name        = "aks-vmss"
-vm_size          = "Standard_B2s"  # Changed from B1s - 2 vCPUs, 4GB RAM
+
+# Student subscription friendly VM sizes
+vm_size          = "Standard_B2ms"
 instance_count   = 1
 admin_username   = "azureuser"
 ssh_public_key_path = "~/.ssh/id_rsa.pub"
 
 aks_name           = "aks-cluster"
-kubernetes_version = "1.32.4"
+kubernetes_version = "1.32.4"  # Stable version
+
 node_count         = 1
-aks_vm_size        = "Standard_B2s"  # Changed from B1s - AKS system pools requirement
+aks_vm_size        = "Standard_B2ms"
 
 tags = {
   environment = "development"

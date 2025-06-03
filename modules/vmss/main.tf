@@ -1,4 +1,4 @@
-# Fixed modules/vmss/main.tf - Use zone 3 and available VM size
+# Fixed modules/vmss/main.tf - Remove zones to avoid allocation issues
 resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   name                = var.vmss_name
   resource_group_name = var.resource_group_name
@@ -11,8 +11,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   # Disable password authentication
   disable_password_authentication = true
   
-  # Enable zones for multi-AZ - Fixed: Only use zone 3 for East US
-  zones = ["3"]
+  # Remove zones to avoid allocation issues - let Azure choose best placement
+  # zones = ["3"]
 
   source_image_reference {
     publisher = "Canonical"
